@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import svm
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -28,25 +30,33 @@ from sklearn.svm import SVC
 dataset = pd.read_csv('dataset/kt-pentacan-dataset.csv', delimiter=',')
 
 # dimensões do dataset
-print(dataset.shape)
+# print(dataset.shape)
 
 # primeiras linhas do dataset
-print(dataset.head())
+# print(dataset.head())
 
 # Separação em conjuntos de treino e teste
 array = dataset.values
 columnsTemp = dataset.columns
-print('columnsL ', columnsTemp)
-X = array[:, 0:29].astype(float)
+X = array[:, 0:dataset.columns.size].astype(float)
 Y = array[:, dataset.columns.size - 1]
-# X = array[:, 0:8].astype(float)
-# Y = array[:, 8]
-# S = array[:, 11:30].astype(float)
-# D = array[:, 29]
-# print('S: ', S)
-# print('D: ', D)
-print('X: ', X.size)
-print('Y: ', Y.size)
+
+clf = svm.SVC(decision_function_shape='ovo')
+clf.fit(X, Y)
+dec = clf.decision_function(X)
+print(dec.shape[1])
+
+clf = svm.SVC(decision_function_shape='ovr')
+clf.fit(X, Y)
+dec = clf.decision_function(X)
+print(dec.shape[1])
+
+stages = dataset.values[:, dataset.columns.size - 1:dataset.columns.size].astype(int)
+stages = dataset
+g1 = sns.displot(dataset, x="label")
+g1.set_ylabels('Frequência')
+g1.set_xlabels('Estágios')
+plt.show()
 
 test_size = 0.20
 seed = 21
@@ -60,7 +70,6 @@ scoring = 'accuracy'
 models = [
     ('LR', LogisticRegression(solver='newton-cg')),
     ('KNN', KNeighborsClassifier()),
-    ('CART', DecisionTreeClassifier()),
     ('NB', GaussianNB()),
     ('SVM', SVC())
 ]
@@ -81,14 +90,20 @@ for name, model in models:
     msg = " % s: % f (% f)" % (name, cv_results.mean(), cv_results.std())
     print(msg)
 
+# Comparação dos modelos
+fig = plt.figure()
+fig.suptitle('Comparação dos Modelos')
+ax = fig.add_subplot(111)
+plt.boxplot(results)
+ax.set_xticklabels(names)
+plt.show()
+
 print('')
 
 # Padronização do dataset
 pipelines = []
 pipelines.append(('ScaledLR', Pipeline([('Scaler', StandardScaler()), ('LR', LogisticRegression())])))
-pipelines.append(('ScaledLDA', Pipeline([('Scaler', StandardScaler()), ('LDA', LinearDiscriminantAnalysis())])))
 pipelines.append(('ScaledKNN', Pipeline([('Scaler', StandardScaler()), ('KNN', KNeighborsClassifier())])))
-pipelines.append(('ScaledCART', Pipeline([('Scaler', StandardScaler()), ('CART', DecisionTreeClassifier())])))
 pipelines.append(('ScaledNB', Pipeline([('Scaler', StandardScaler()), ('NB', GaussianNB())])))
 pipelines.append(('ScaledSVM', Pipeline([('Scaler', StandardScaler()), ('SVM', SVC())])))
 
@@ -177,4 +192,3 @@ cmd.plot(values_format="d")
 plt.suptitle('Matriz de confusão')
 plt.show()
 print(classification_report(Y_test, predictions, target_names=labels))
-
