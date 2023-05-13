@@ -121,7 +121,7 @@ fig.suptitle('Comparação dos Modelos')
 ax = fig.add_subplot(111)
 plt.boxplot(results)
 ax.set_xticklabels(names)
-plt.show()
+# plt.show()
 
 print('')
 
@@ -152,7 +152,7 @@ fig.suptitle('Comparação do Pipeline')
 ax = fig.add_subplot(111)
 plt.boxplot(pipelinesResults)
 ax.set_xticklabels(pipelinesNames)
-plt.show()
+# plt.show()
 
 print('')
 
@@ -208,15 +208,15 @@ model.fit(X_train, Y_train)
 
 # Estimativa da acurácia no conjunto de teste
 predictions = model.predict(X_test)
-print("Accuracy score = ", accuracy_score(Y_test, predictions))
+# print("Accuracy score = ", accuracy_score(Y_test, predictions))
 
 # print('')
 
 # Matriz de confusão
-# cm = confusion_matrix(Y_test, predictions)
-# labels = ["1", "2", "3", "4"]
-# cmd = ConfusionMatrixDisplay(cm, display_labels=labels)
+cm = confusion_matrix(Y_test, predictions)
+labels = ["1", "2", "3", "4"]
+cmd = ConfusionMatrixDisplay(cm, display_labels=labels)
 # cmd.plot(values_format="d")
 # plt.suptitle('Matriz de confusão')
 # plt.show()
-# print(classification_report(Y_test, predictions, target_names=labels))
+print(classification_report(Y_test, predictions, target_names=labels))
